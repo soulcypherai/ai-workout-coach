@@ -1,0 +1,709 @@
+# Edit Order
+
+> Edit an existing order. You can update the recipient, the payment method, and/or the locale.
+
+**API scope required**: `orders.update`
+
+
+## OpenAPI
+
+````yaml patch /2022-06-09/orders/{orderId}
+paths:
+  path: /2022-06-09/orders/{orderId}
+  method: patch
+  servers:
+    - url: https://staging.crossmint.com/api
+      description: Staging environment (testnets)
+    - url: https://www.crossmint.com/api
+      description: Production environment (mainnets)
+  request:
+    security:
+      - title: apiKey
+        parameters:
+          query: {}
+          header:
+            X-API-KEY:
+              type: apiKey
+          cookie: {}
+      - title: orderClientSecret
+        parameters:
+          query: {}
+          header:
+            Authorization:
+              type: apiKey
+          cookie: {}
+    parameters:
+      path:
+        orderId:
+          schema:
+            - type: string
+              required: true
+              description: |
+                This is the identifier for the order with UUID format.
+
+                **Example:** `9c82ef99-617f-497d-9abb-fd355291681b`
+      query: {}
+      header: {}
+      cookie: {}
+    body:
+      application/json:
+        schemaArray:
+          - type: object
+            properties:
+              recipient:
+                allOf:
+                  - $ref: '#/components/schemas/Recipient'
+              locale:
+                allOf:
+                  - $ref: '#/components/schemas/Locale'
+              payment:
+                allOf:
+                  - $ref: '#/components/schemas/Payment'
+            required: true
+            refIdentifier: '#/components/schemas/OrderDTO'
+            additionalProperties: false
+        examples:
+          example:
+            value:
+              recipient:
+                email: jsmith@example.com
+                physicalAddress:
+                  name: <string>
+                  line1: <string>
+                  line2: <string>
+                  city: <string>
+                  state: <string>
+                  postalCode: <string>
+                  country: <string>
+              locale: en-US
+              payment:
+                receiptEmail: jsmith@example.com
+                method: arbitrum-sepolia
+                currency: eth
+                payerAddress: <string>
+  response:
+    '200':
+      application/json:
+        schemaArray:
+          - type: object
+            properties:
+              orderId:
+                allOf:
+                  - type: string
+                    example: b2959ca5-65e4-466a-bd26-1bd05cb4f837
+              phase:
+                allOf:
+                  - type: string
+                    example: payment
+              locale:
+                allOf:
+                  - type: string
+                    example: en-US
+              lineItems:
+                allOf:
+                  - type: array
+                    items:
+                      type: object
+                      properties:
+                        chain:
+                          type: string
+                          example: polygon-amoy
+                        quantity:
+                          type: number
+                          example: 1
+                        callData:
+                          type: object
+                          properties:
+                            quantity:
+                              type: number
+                              example: 1
+                            ADDITIONAL_PROPERTIES:
+                              type: string
+                              example: Your other mint function arguments
+                        metadata:
+                          type: object
+                          properties:
+                            name:
+                              type: string
+                              example: Headless Checkout Demo
+                            description:
+                              type: string
+                              example: NFT Description
+                            imageUrl:
+                              type: string
+                              example: https://cdn.io/image.png
+                        quote:
+                          type: object
+                          properties:
+                            status:
+                              type: string
+                              example: valid
+                            charges:
+                              type: object
+                              properties:
+                                unit:
+                                  type: object
+                                  properties:
+                                    amount:
+                                      type: string
+                                      example: '0.0001'
+                                    currency:
+                                      type: string
+                                      example: eth
+                                salesTax:
+                                  type: object
+                                  description: >-
+                                    Sales tax applied to physical product
+                                    purchases
+                                  properties:
+                                    amount:
+                                      type: string
+                                      example: '0.34'
+                                    currency:
+                                      type: string
+                                      example: usdc
+                                shipping:
+                                  type: object
+                                  description: >-
+                                    Shipping costs for physical product
+                                    purchases
+                                  properties:
+                                    amount:
+                                      type: string
+                                      example: '0'
+                                    currency:
+                                      type: string
+                                      example: usdc
+                            totalPrice:
+                              type: object
+                              properties:
+                                amount:
+                                  type: string
+                                  example: '0.0001'
+                                currency:
+                                  type: string
+                                  example: eth
+                        delivery:
+                          type: object
+                          properties:
+                            status:
+                              type: string
+                              enum:
+                                - awaiting-payment
+                                - in-progress
+                                - completed
+                                - failed
+                              description: >-
+                                Status of the delivery. 'awaiting-payment':
+                                Initial state before payment is made.
+                                'in-progress': Payment received, transaction
+                                submitted but not yet completed. 'completed':
+                                Successfully delivered with transaction ID and
+                                tokens. 'failed': Delivery failed, typically for
+                                refunded transactions.
+                              example: awaiting-payment
+                            recipient:
+                              type: object
+                              properties:
+                                locator:
+                                  type: string
+                                  example: email:<email_address>:<chain>
+                                email:
+                                  type: string
+                                  example: testy@crossmint.com
+                                walletAddress:
+                                  type: string
+                                  example: 0x1234abcd...
+              quote:
+                allOf:
+                  - type: object
+                    properties:
+                      status:
+                        type: string
+                        enum:
+                          - valid
+                          - expired
+                          - all-line-items-unavailable
+                          - requires-physical-address
+                        description: >-
+                          Status of the quote. 'requires-physical-address'
+                          indicates that a shipping address is required for
+                          physical products.
+                        example: valid
+                      quotedAt:
+                        type: string
+                        example: '2024-06-07T16:55:44.653Z'
+                      expiresAt:
+                        type: string
+                        example: '2024-06-07T17:55:44.653Z'
+                      totalPrice:
+                        type: object
+                        properties:
+                          amount:
+                            type: string
+                            example: '0.0001375741'
+                          currency:
+                            type: string
+                            example: eth
+              payment:
+                allOf:
+                  - type: object
+                    properties:
+                      status:
+                        type: string
+                        enum:
+                          - requires-kyc
+                          - failed-kyc
+                          - manual-kyc
+                          - awaiting-payment
+                          - requires-recipient
+                          - requires-crypto-payer-address
+                          - failed
+                          - in-progress
+                          - completed
+                        description: >-
+                          Status of the payment. View the status codes for more
+                          information.
+                        example: awaiting-payment
+                      method:
+                        type: string
+                        example: base-sepolia
+                      currency:
+                        type: string
+                        example: eth
+                      preparation:
+                        type: object
+                        properties:
+                          chain:
+                            type: string
+                            example: base-sepolia
+                          payerAddress:
+                            type: string
+                            example: 0x1234abcd...
+                          serializedTransaction:
+                            type: string
+                            example: 0x02f90.....
+            refIdentifier: '#/components/schemas/OrderObject'
+        examples:
+          example:
+            value:
+              orderId: b2959ca5-65e4-466a-bd26-1bd05cb4f837
+              phase: payment
+              locale: en-US
+              lineItems:
+                - chain: polygon-amoy
+                  quantity: 1
+                  callData:
+                    quantity: 1
+                    ADDITIONAL_PROPERTIES: Your other mint function arguments
+                  metadata:
+                    name: Headless Checkout Demo
+                    description: NFT Description
+                    imageUrl: https://cdn.io/image.png
+                  quote:
+                    status: valid
+                    charges:
+                      unit:
+                        amount: '0.0001'
+                        currency: eth
+                      salesTax:
+                        amount: '0.34'
+                        currency: usdc
+                      shipping:
+                        amount: '0'
+                        currency: usdc
+                    totalPrice:
+                      amount: '0.0001'
+                      currency: eth
+                  delivery:
+                    status: awaiting-payment
+                    recipient:
+                      locator: email:<email_address>:<chain>
+                      email: testy@crossmint.com
+                      walletAddress: 0x1234abcd...
+              quote:
+                status: valid
+                quotedAt: '2024-06-07T16:55:44.653Z'
+                expiresAt: '2024-06-07T17:55:44.653Z'
+                totalPrice:
+                  amount: '0.0001375741'
+                  currency: eth
+              payment:
+                status: awaiting-payment
+                method: base-sepolia
+                currency: eth
+                preparation:
+                  chain: base-sepolia
+                  payerAddress: 0x1234abcd...
+                  serializedTransaction: 0x02f90.....
+        description: Order successfully created.
+    '400':
+      application/json:
+        schemaArray:
+          - type: object
+            properties:
+              error:
+                allOf:
+                  - type: boolean
+                    example: true
+              message:
+                allOf:
+                  - type: string
+                    description: Human-readable error message describing what went wrong
+              code:
+                allOf:
+                  - type: string
+                    description: Machine-readable error code for programmatic handling
+                    enum:
+                      - single_purchase_exceeded
+                      - daily_transaction_exceeded
+                      - token_daily_volume_exceeded
+              parameters:
+                allOf:
+                  - type: object
+                    description: Additional parameters providing context for the error
+                    properties:
+                      amount:
+                        type: string
+                        description: Transaction amount that caused the error
+                      limit:
+                        type: string
+                        description: The limit that was exceeded
+                      hoursUntilReset:
+                        type: string
+                        description: Hours until the limit resets
+                      remainingAmount:
+                        type: string
+                        description: Remaining amount available before hitting the limit
+            refIdentifier: '#/components/schemas/400Response'
+        examples:
+          example:
+            value:
+              error: true
+              message: <string>
+              code: single_purchase_exceeded
+              parameters:
+                amount: <string>
+                limit: <string>
+                hoursUntilReset: <string>
+                remainingAmount: <string>
+        description: >-
+          Invalid arguments, please make sure you're following the api
+          specification.
+    '403':
+      application/json:
+        schemaArray:
+          - type: object
+            properties:
+              error:
+                allOf:
+                  - type: boolean
+                    example: true
+              message:
+                allOf:
+                  - type: string
+                    example: >-
+                      Malformed API key. / API key provided doesn't have
+                      required scopes.
+            refIdentifier: '#/components/schemas/403Response'
+        examples:
+          example:
+            value:
+              error: true
+              message: >-
+                Malformed API key. / API key provided doesn't have required
+                scopes.
+        description: Forbidden error, please ensure the credentials are correct.
+    '404':
+      application/json:
+        schemaArray:
+          - type: object
+            properties:
+              error:
+                allOf:
+                  - type: boolean
+                    example: true
+              message:
+                allOf:
+                  - type: string
+                    example: Not found
+            refIdentifier: '#/components/schemas/404Response'
+        examples:
+          example:
+            value:
+              error: true
+              message: Not found
+        description: Not found error.
+    '503':
+      application/json:
+        schemaArray:
+          - type: object
+            properties:
+              error:
+                allOf:
+                  - type: boolean
+                    example: true
+              message:
+                allOf:
+                  - type: string
+                    example: >-
+                      Please try again in a few minutes. If the issue still
+                      persists, contact Crossmint support.
+            refIdentifier: '#/components/schemas/503Response'
+        examples:
+          example:
+            value:
+              error: true
+              message: >-
+                Please try again in a few minutes. If the issue still persists,
+                contact Crossmint support.
+        description: >-
+          Please try again in a few minutes. If the issue still persists,
+          contact Crossmint support.
+    '524':
+      application/json:
+        schemaArray:
+          - type: object
+            properties:
+              error:
+                allOf:
+                  - type: boolean
+                    example: true
+              message:
+                allOf:
+                  - type: string
+                    example: A timeout occurred.
+            refIdentifier: '#/components/schemas/524Response'
+        examples:
+          example:
+            value:
+              error: true
+              message: A timeout occurred.
+        description: A timeout occurred.
+  deprecated: false
+  type: path
+components:
+  schemas:
+    Recipient:
+      oneOf:
+        - type: object
+          title: Email
+          properties:
+            email:
+              type: string
+              format: email
+            physicalAddress:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Full name of the recipient
+                line1:
+                  type: string
+                  description: Street address, P.O. box, company name, c/o
+                line2:
+                  type: string
+                  description: Apartment, suite, unit, building, floor, etc.
+                city:
+                  type: string
+                  description: City, district, suburb, town, or village
+                state:
+                  type: string
+                  description: >-
+                    State, county, province, or region. Required for US
+                    addresses.
+                postalCode:
+                  type: string
+                  description: ZIP or postal code
+                country:
+                  type: string
+                  description: >-
+                    Two-letter country code (ISO 3166-1 alpha-2). Currently only
+                    US is supported.
+              required:
+                - name
+                - line1
+                - city
+                - postalCode
+                - country
+              description: >-
+                Physical shipping address for the recipient. Required when
+                purchasing physical products.
+          required:
+            - email
+          additionalProperties: false
+          description: >-
+            Recipient of the items being purchased. Crossmint will create a
+            custodial wallet address for the user on the fly, that they can
+            later log in to. If no recipient is passed, an order will be created
+            with the status 'requires-recipient', until you pass one.
+        - type: object
+          title: Wallet
+          properties:
+            walletAddress:
+              type: string
+            physicalAddress:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Full name of the recipient
+                line1:
+                  type: string
+                  description: Street address, P.O. box, company name, c/o
+                line2:
+                  type: string
+                  description: Apartment, suite, unit, building, floor, etc.
+                city:
+                  type: string
+                  description: City, district, suburb, town, or village
+                state:
+                  type: string
+                  description: >-
+                    State, county, province, or region. Required for US
+                    addresses.
+                postalCode:
+                  type: string
+                  description: ZIP or postal code
+                country:
+                  type: string
+                  description: >-
+                    Two-letter country code (ISO 3166-1 alpha-2). Currently only
+                    US is supported.
+              required:
+                - name
+                - line1
+                - city
+                - postalCode
+                - country
+              description: >-
+                Physical shipping address for the recipient. Required when
+                purchasing physical products.
+          required:
+            - walletAddress
+          additionalProperties: false
+          description: >-
+            Recipient of the items being purchased. If specifying a recipient by
+            wallet address, ensure the address is valid for the chain your
+            **collection** is on, which may differ from the chain the payment is
+            performed on.
+    Locale:
+      default: en-US
+      type: string
+      enum:
+        - en-US
+        - es-ES
+        - fr-FR
+        - it-IT
+        - ko-KR
+        - pt-PT
+        - ja-JP
+        - zh-CN
+        - zh-TW
+        - de-DE
+        - ru-RU
+        - tr-TR
+        - uk-UA
+        - th-TH
+        - vi-VN
+        - Klingon
+      example: en-US
+      description: >-
+        Locale for the checkout, in IETF BCP 47. It impacts the email receipt
+        language. Ensure your UI is set to the same language as specified here.
+        Throws an error if passed an invalid language.
+    Payment:
+      discriminator:
+        propertyName: method
+      oneOf:
+        - type: object
+          title: EVM
+          additionalProperties: false
+          properties:
+            receiptEmail:
+              type: string
+              format: email
+              description: Email that the receipt will be sent to.
+            method:
+              type: string
+              enum:
+                - arbitrum-sepolia
+                - base-sepolia
+                - ethereum-sepolia
+                - optimism-sepolia
+                - arbitrum
+                - bsc
+                - ethereum
+                - optimism
+            currency:
+              type: string
+              enum:
+                - eth
+                - usdc
+                - degen
+                - brett
+                - toshi
+                - usdxm
+                - credit
+            payerAddress:
+              type: string
+              pattern: ^0x[0-9a-fA-F]{40}$
+              description: An EVM wallet address.
+          required:
+            - method
+            - currency
+        - type: object
+          title: Solana
+          additionalProperties: false
+          properties:
+            receiptEmail:
+              type: string
+              format: email
+              description: Email that the receipt will be sent to.
+            method:
+              type: string
+              enum:
+                - solana
+            currency:
+              type: string
+              enum:
+                - sol
+                - usdc
+                - bonk
+            payerAddress:
+              type: string
+              pattern: ^[1-9A-HJ-NP-Za-km-z]{32,44}$
+              description: A Solana public key.
+          required:
+            - method
+            - currency
+        - type: object
+          title: Fiat
+          additionalProperties: false
+          properties:
+            receiptEmail:
+              type: string
+              format: email
+              description: Email that the receipt will be sent to.
+            method:
+              type: string
+              enum:
+                - stripe-payment-element
+            currency:
+              default: usd
+              type: string
+              enum:
+                - usd
+                - eur
+                - aud
+                - gbp
+                - jpy
+                - sgd
+                - hkd
+                - krw
+                - inr
+                - vnd
+          required:
+            - method
+
+````

@@ -1,0 +1,10 @@
+[Unit]
+Description=Run Stripe Reconciliation Hourly
+Requires=stripe-reconciliation.service
+
+[Timer]
+OnCalendar=hourly
+Persistent=true
+
+[Install]
+WantedBy=timers.target 

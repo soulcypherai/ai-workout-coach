@@ -1,0 +1,19 @@
+{
+  "plugins": ["@trivago/prettier-plugin-sort-imports", "prettier-plugin-tailwindcss"],
+  "tailwindFunctions": ["clsx"],
+  "importOrder": [
+    "^(react$|next/.*$)",
+    "<THIRD_PARTY_MODULES>",
+    "^@/components/.*$",
+    "^@/context/.*$",
+    "^@/hooks/.*$",
+    "^@/libs/.*$",
+    "^@/types/.*$",
+    "^@/svgs/.*$",
+    "^@/shaders/.*$",
+    "^[./]"
+  ],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true,
+  "importOrderGroupNamespaceSpecifiers": true
+}

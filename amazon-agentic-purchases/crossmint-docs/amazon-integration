@@ -1,0 +1,83 @@
+# Physical Product Purchases
+
+> How to purchase physical products with crypto using Headless Checkout
+
+Crossmint's Headless Checkout now supports purchasing physical products using a wallet's crypto balance through the `productLocator` parameter. This guide explains how to integrate physical product purchases and handle shipping requirements.
+
+## Physical Address Requirement
+
+When purchasing physical products, a shipping address is required (currently only US addresses are supported). You can provide this in two ways:
+
+### 1. Include Address During Order Creation
+
+```json
+POST /api/2022-06-09/orders
+{
+    "recipient": {
+        "email": "buyer@example.com",
+        "physicalAddress": {
+            "name": "John Doe", // required
+            "line1": "123 Main St", // required
+            "line2": "Apt 4B", // optional
+            "city": "San Francisco", // required
+            "state": "CA", // required for US addresses
+            "postalCode": "94105", // required
+            "country": "US" // required - only US is currently supported
+        }
+    }
+}
+```
+
+### 2. Update Address After Order Creation
+
+If you create an order without specifying a `physicalAddress`, the order's quote status will be `requires-physical-address`.
+
+```json response
+{
+    "order": {
+        "orderId": "...",
+        "quote": {
+            "status": "requires-physical-address"
+        }
+    }
+}
+```
+
+To resolve this status, update the order with the physical address:
+
+```json
+PATCH /api/2022-06-09/orders/{orderId}
+{
+  "recipient": {
+    "physicalAddress": {
+      "name": "John Doe",      // required
+      "line1": "123 Main St",  // required
+      "line2": "Apt 4B",       // optional
+      "city": "San Francisco", // required
+      "state": "CA",           // required for US addresses
+      "postalCode": "94105",   // required
+      "country": "US"          // required - only US is currently supported
+    }
+  }
+}
+```
+
+After providing the physical address, the order status will update and include the necessary `payment.preparation` parameters to proceed with payment.
+
+## Order Status Handling
+
+Orders for physical products may enter the following statuses:
+
+* `requires-physical-address` - The order requires a shipping address. During this status, `payment.preparation` parameters will not be present.
+* `valid` - The order has all required information and is ready for payment.
+
+## Supported Providers
+
+### Amazon
+
+Amazon products can be purchased using either their ASIN or product URL. See the [Amazon Integration Guide](/payments/headless/guides/providers/amazon) for details.
+
+### Shopify
+
+Shopify products can be purchased using the product URL and variant ID. See the [Shopify Integration Guide](/payments/headless/guides/providers/shopify) for details.
+

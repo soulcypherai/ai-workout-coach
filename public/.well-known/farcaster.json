@@ -1,0 +1,31 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjExNDE2MzMsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHg4NjEzRjMwM0JlYjgwYzg4NWI2MjdlMWQ0OGVFOWViNTdBMTNCMDgyIn0",
+    "payload": "eyJkb21haW4iOiJjaGF0LmFpc2hhcmsuZnVuIn0",
+    "signature": "MHhmNGM5ZDM4NWQxZTJkN2FkZmVmODE5OGFkMzhhMTAyZmQ3OTA0ZGUxY2M1Njk1N2E1NDZjNGQyNmUyZjRlMmJkNmU5ODgxYTJkZTJlYjNlMjI1YzI3MjNiNjVmNmYwNjk1NTY2Y2JjNWU4Yzc0OWE1ZDU5NzdjZTlmYjQzZjZiMjFi"
+  },
+  "frame": {
+    "homeUrl": "https://chat.aishark.fun",
+    "version": "next",
+    "name": "AI-SHARK.FUN",
+    "iconUrl": "https://chat.aishark.fun/fav.png",
+    "splashImageUrl": "https://chat.aishark.fun/fav.png",
+    "splashBackgroundColor": "#000000",
+    "imageUrl": "https://chat.aishark.fun/fav.png",
+    "subtitle": "AI powered pitch room",
+    "description": "Anything you can dream of, just pitch it",
+    "primaryCategory": "entertainment",
+    "webhookUrl": "https://api.aishark.fun/api/webhook",
+    "screenshotUrls": [
+      "https://chat.aishark.fun/screenshot1.png",
+      "https://chat.aishark.fun/screenshot2.png",
+      "https://chat.aishark.fun/screenshot3.png"
+    ],
+    "tags": ["entertainment", "ai", "pitch"],
+    "heroImageUrl": "https://chat.aishark.fun/og.png",
+    "tagline": "AI powered pitch room",
+    "ogTitle": "AI-SHARK.FUN",
+    "ogDescription": "Anything you can dream of, just pitch it",
+    "ogImageUrl": "https://chat.aishark.fun/fav.png"
+  }
+}

@@ -1,0 +1,923 @@
+# Create Order
+
+> Creates a new order that can be used to complete a headless checkout.
+
+**API scope required**: `orders.create`
+
+## OpenAPI
+
+```yaml post /2022-06-09/orders
+paths:
+  path: /2022-06-09/orders
+  method: post
+  servers:
+    - url: https://staging.crossmint.com/api
+      description: Staging environment (testnets)
+    - url: https://www.crossmint.com/api
+      description: Production environment (mainnets)
+  request:
+    security:
+      - title: apiKey
+        parameters:
+          query: {}
+          header:
+            X-API-KEY:
+              type: apiKey
+          cookie: {}
+    parameters:
+      path: {}
+      query: {}
+      header: {}
+      cookie: {}
+    body:
+      application/json:
+        schemaArray:
+          - type: object
+            properties:
+              recipient:
+                allOf:
+                  - $ref: "#/components/schemas/Recipient"
+              locale:
+                allOf:
+                  - $ref: "#/components/schemas/Locale"
+              payment:
+                allOf:
+                  - $ref: "#/components/schemas/Payment"
+              lineItems:
+                allOf:
+                  - $ref: "#/components/schemas/LineItems"
+            required: true
+            requiredProperties:
+              - payment
+              - lineItems
+            additionalProperties: false
+        examples:
+          example:
+            value:
+              recipient:
+                email: jsmith@example.com
+                physicalAddress:
+                  name: <string>
+                  line1: <string>
+                  line2: <string>
+                  city: <string>
+                  state: <string>
+                  postalCode: <string>
+                  country: <string>
+              locale: en-US
+              payment:
+                receiptEmail: jsmith@example.com
+                method: arbitrum-sepolia
+                currency: eth
+                payerAddress: <string>
+              lineItems:
+                collectionLocator: crossmint:<collectionId>
+                callData:
+                  totalPrice: <string>
+  response:
+    "201":
+      application/json:
+        schemaArray:
+          - type: object
+            properties:
+              clientSecret:
+                allOf:
+                  - type: string
+                    description: >-
+                      A token exclusively scoped to a particular order, allowing
+                      for the reading or updating of that order.
+                    example: _removed_
+              order:
+                allOf:
+                  - $ref: "#/components/schemas/OrderObject"
+            refIdentifier: "#/components/schemas/CreateOrderResponse"
+        examples:
+          example:
+            value:
+              clientSecret: _removed_
+              order:
+                orderId: b2959ca5-65e4-466a-bd26-1bd05cb4f837
+                phase: payment
+                locale: en-US
+                lineItems:
+                  - chain: polygon-amoy
+                    quantity: 1
+                    callData:
+                      quantity: 1
+                      ADDITIONAL_PROPERTIES: Your other mint function arguments
+                    metadata:
+                      name: Headless Checkout Demo
+                      description: NFT Description
+                      imageUrl: https://cdn.io/image.png
+                    quote:
+                      status: valid
+                      charges:
+                        unit:
+                          amount: "0.0001"
+                          currency: eth
+                        salesTax:
+                          amount: "0.34"
+                          currency: usdc
+                        shipping:
+                          amount: "0"
+                          currency: usdc
+                      totalPrice:
+                        amount: "0.0001"
+                        currency: eth
+                    delivery:
+                      status: awaiting-payment
+                      recipient:
+                        locator: email:<email_address>:<chain>
+                        email: testy@crossmint.com
+                        walletAddress: 0x1234abcd...
+                quote:
+                  status: valid
+                  quotedAt: "2024-06-07T16:55:44.653Z"
+                  expiresAt: "2024-06-07T17:55:44.653Z"
+                  totalPrice:
+                    amount: "0.0001375741"
+                    currency: eth
+                payment:
+                  status: awaiting-payment
+                  method: base-sepolia
+                  currency: eth
+                  preparation:
+                    chain: base-sepolia
+                    payerAddress: 0x1234abcd...
+                    serializedTransaction: 0x02f90.....
+        description: Order successfully created.
+    "400":
+      application/json:
+        schemaArray:
+          - type: object
+            properties:
+              error:
+                allOf:
+                  - type: boolean
+                    example: true
+              message:
+                allOf:
+                  - type: string
+                    description: Human-readable error message describing what went wrong
+              code:
+                allOf:
+                  - type: string
+                    description: Machine-readable error code for programmatic handling
+                    enum:
+                      - single_purchase_exceeded
+                      - daily_transaction_exceeded
+                      - token_daily_volume_exceeded
+              parameters:
+                allOf:
+                  - type: object
+                    description: Additional parameters providing context for the error
+                    properties:
+                      amount:
+                        type: string
+                        description: Transaction amount that caused the error
+                      limit:
+                        type: string
+                        description: The limit that was exceeded
+                      hoursUntilReset:
+                        type: string
+                        description: Hours until the limit resets
+                      remainingAmount:
+                        type: string
+                        description: Remaining amount available before hitting the limit
+            refIdentifier: "#/components/schemas/400Response"
+        examples:
+          limits:single-purchase.exceeded:
+            description: Purchase limit exceeded
+            value:
+              error: true
+              message: >-
+                Purchase limit exceeded. Transaction amount (150) exceeds the
+                maximum allowed single purchase limit of 100.
+              code: limits:single-purchase.exceeded
+              parameters:
+                amount: "150"
+                limit: "100"
+          limits:daily-transaction.exceeded:
+            description: Daily transaction limit reached
+            value:
+              error: true
+              message: >-
+                Daily transaction limit reached. You have exceeded the daily
+                transaction limit of 1000. Your limit will reset in 8 hours. You
+                have 0 left to spend today.
+              code: limits:daily-transaction.exceeded
+              parameters:
+                limit: "1000"
+                hoursUntilReset: "8"
+                remainingAmount: "0"
+          limits:token-daily-volume.exceeded:
+            description: Token daily volume limit exceeded
+            value:
+              error: true
+              message: >-
+                Token daily volume limit exceeded. Current request would exceed
+                the configured daily volume limit of 5000. Limit resets in 12
+                hours. Remaining capacity: 250.
+              code: limits:token-daily-volume.exceeded
+              parameters:
+                limit: "5000"
+                hoursUntilReset: "12"
+                remainingAmount: "250"
+        description: >-
+          Invalid arguments, please make sure you're following the api
+          specification.
+    "403":
+      application/json:
+        schemaArray:
+          - type: object
+            properties:
+              error:
+                allOf:
+                  - type: boolean
+                    example: true
+              message:
+                allOf:
+                  - type: string
+                    example: >-
+                      Malformed API key. / API key provided doesn't have
+                      required scopes.
+            refIdentifier: "#/components/schemas/403Response"
+        examples:
+          example:
+            value:
+              error: true
+              message: >-
+                Malformed API key. / API key provided doesn't have required
+                scopes.
+        description: Forbidden error, please ensure the credentials are correct.
+    "404":
+      application/json:
+        schemaArray:
+          - type: object
+            properties:
+              error:
+                allOf:
+                  - type: boolean
+                    example: true
+              message:
+                allOf:
+                  - type: string
+                    example: Not found
+            refIdentifier: "#/components/schemas/404Response"
+        examples:
+          example:
+            value:
+              error: true
+              message: Not found
+        description: Not found error.
+    "503":
+      application/json:
+        schemaArray:
+          - type: object
+            properties:
+              error:
+                allOf:
+                  - type: boolean
+                    example: true
+              message:
+                allOf:
+                  - type: string
+                    example: >-
+                      Please try again in a few minutes. If the issue still
+                      persists, contact Crossmint support.
+            refIdentifier: "#/components/schemas/503Response"
+        examples:
+          example:
+            value:
+              error: true
+              message: >-
+                Please try again in a few minutes. If the issue still persists,
+                contact Crossmint support.
+        description: >-
+          Please try again in a few minutes. If the issue still persists,
+          contact Crossmint support.
+    "524":
+      application/json:
+        schemaArray:
+          - type: object
+            properties:
+              error:
+                allOf:
+                  - type: boolean
+                    example: true
+              message:
+                allOf:
+                  - type: string
+                    example: A timeout occurred.
+            refIdentifier: "#/components/schemas/524Response"
+        examples:
+          example:
+            value:
+              error: true
+              message: A timeout occurred.
+        description: A timeout occurred.
+  deprecated: false
+  type: path
+components:
+  schemas:
+    Recipient:
+      oneOf:
+        - type: object
+          title: Email
+          properties:
+            email:
+              type: string
+              format: email
+            physicalAddress:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Full name of the recipient
+                line1:
+                  type: string
+                  description: Street address, P.O. box, company name, c/o
+                line2:
+                  type: string
+                  description: Apartment, suite, unit, building, floor, etc.
+                city:
+                  type: string
+                  description: City, district, suburb, town, or village
+                state:
+                  type: string
+                  description: >-
+                    State, county, province, or region. Required for US
+                    addresses.
+                postalCode:
+                  type: string
+                  description: ZIP or postal code
+                country:
+                  type: string
+                  description: >-
+                    Two-letter country code (ISO 3166-1 alpha-2). Currently only
+                    US is supported.
+              required:
+                - name
+                - line1
+                - city
+                - postalCode
+                - country
+              description: >-
+                Physical shipping address for the recipient. Required when
+                purchasing physical products.
+          required:
+            - email
+          additionalProperties: false
+          description: >-
+            Recipient of the items being purchased. Crossmint will create a
+            custodial wallet address for the user on the fly, that they can
+            later log in to. If no recipient is passed, an order will be created
+            with the status 'requires-recipient', until you pass one.
+        - type: object
+          title: Wallet
+          properties:
+            walletAddress:
+              type: string
+            physicalAddress:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Full name of the recipient
+                line1:
+                  type: string
+                  description: Street address, P.O. box, company name, c/o
+                line2:
+                  type: string
+                  description: Apartment, suite, unit, building, floor, etc.
+                city:
+                  type: string
+                  description: City, district, suburb, town, or village
+                state:
+                  type: string
+                  description: >-
+                    State, county, province, or region. Required for US
+                    addresses.
+                postalCode:
+                  type: string
+                  description: ZIP or postal code
+                country:
+                  type: string
+                  description: >-
+                    Two-letter country code (ISO 3166-1 alpha-2). Currently only
+                    US is supported.
+              required:
+                - name
+                - line1
+                - city
+                - postalCode
+                - country
+              description: >-
+                Physical shipping address for the recipient. Required when
+                purchasing physical products.
+          required:
+            - walletAddress
+          additionalProperties: false
+          description: >-
+            Recipient of the items being purchased. If specifying a recipient by
+            wallet address, ensure the address is valid for the chain your
+            **collection** is on, which may differ from the chain the payment is
+            performed on.
+    Locale:
+      default: en-US
+      type: string
+      enum:
+        - en-US
+        - es-ES
+        - fr-FR
+        - it-IT
+        - ko-KR
+        - pt-PT
+        - ja-JP
+        - zh-CN
+        - zh-TW
+        - de-DE
+        - ru-RU
+        - tr-TR
+        - uk-UA
+        - th-TH
+        - vi-VN
+        - Klingon
+      example: en-US
+      description: >-
+        Locale for the checkout, in IETF BCP 47. It impacts the email receipt
+        language. Ensure your UI is set to the same language as specified here.
+        Throws an error if passed an invalid language.
+    Payment:
+      discriminator:
+        propertyName: method
+      oneOf:
+        - type: object
+          title: EVM
+          additionalProperties: false
+          properties:
+            receiptEmail:
+              type: string
+              format: email
+              description: Email that the receipt will be sent to.
+            method:
+              type: string
+              enum:
+                - arbitrum-sepolia
+                - base-sepolia
+                - ethereum-sepolia
+                - optimism-sepolia
+                - arbitrum
+                - bsc
+                - ethereum
+                - optimism
+            currency:
+              type: string
+              enum:
+                - eth
+                - usdc
+                - degen
+                - brett
+                - toshi
+                - usdxm
+                - credit
+            payerAddress:
+              type: string
+              pattern: ^0x[0-9a-fA-F]{40}$
+              description: An EVM wallet address.
+          required:
+            - method
+            - currency
+        - type: object
+          title: Solana
+          additionalProperties: false
+          properties:
+            receiptEmail:
+              type: string
+              format: email
+              description: Email that the receipt will be sent to.
+            method:
+              type: string
+              enum:
+                - solana
+            currency:
+              type: string
+              enum:
+                - sol
+                - usdc
+                - bonk
+            payerAddress:
+              type: string
+              pattern: ^[1-9A-HJ-NP-Za-km-z]{32,44}$
+              description: A Solana public key.
+          required:
+            - method
+            - currency
+        - type: object
+          title: Fiat
+          additionalProperties: false
+          properties:
+            receiptEmail:
+              type: string
+              format: email
+              description: Email that the receipt will be sent to.
+            method:
+              type: string
+              enum:
+                - stripe-payment-element
+            currency:
+              default: usd
+              type: string
+              enum:
+                - usd
+                - eur
+                - aud
+                - gbp
+                - jpy
+                - sgd
+                - hkd
+                - krw
+                - inr
+                - vnd
+          required:
+            - method
+    LineItems:
+      oneOf:
+        - type: object
+          title: Single Line Item - Collection Locator
+          additionalProperties: false
+          properties:
+            collectionLocator:
+              description: >-
+                The collection locator of the line item. For example: 
+                `crossmint:<collectionId>`. These fields can be retrieved from
+                the Crossmint console.
+              type: string
+              example: crossmint:<collectionId>
+            callData:
+              type: object
+              additionalProperties: {}
+              description: Information that you pass to your contract mint function.
+              properties:
+                totalPrice:
+                  description: >-
+                    The total price of the line item. It must be the same as the
+                    contract expects to receive. Read
+                    /docs.crossmint.com/payments/advanced/component-properties#mintconfig
+                  type: string
+          required:
+            - collectionLocator
+        - type: object
+          title: Single Line Item - Product Locator
+          additionalProperties: false
+          properties:
+            productLocator:
+              description: >-
+                The product locator for physical products. For Amazon products,
+                use format `amazon:<ASIN>` (e.g. `amazon:B01DFKC2SO`) or
+                `amazon:<URL>` (e.g.
+                `amazon:https://www.amazon.com/dp/B01DFKC2SO`).
+              type: string
+              example: amazon:B01DFKC2SO
+          required:
+            - productLocator
+        - type: object
+          title: Single Line Item - Token Locator
+          additionalProperties: false
+          properties:
+            tokenLocator:
+              description: >-
+                The token locator of the line item. For EVM chains use format
+                `<blockchain>:<contractAddress>:<tokenId>` (e.g.
+                `ethereum:0x71c7656ec7ab88b098defb751b7401b5f6d897:1234`). For
+                Solana use format `solana:<mintHash>` (e.g.
+                `solana:7nE9XwXs3XgpH8rnXMFvQYWZTXUFJyZC4rZ5CPX4X4p5`).
+              type: string
+              pattern: >-
+                ^(ethereum|polygon|optimism|arbitrum|base|zora|avalanche|bsc):[0-9a-fA-F]{40}:\d+$|^solana:[1-9A-HJ-NP-Za-km-z]{32,44}$
+            callData:
+              type: object
+              additionalProperties: {}
+              description: Information that you pass to your contract mint function.
+              properties:
+                totalPrice:
+                  description: >-
+                    The total price of the line item. It must be the same as the
+                    contract expects to receive. Read
+                    /docs.crossmint.com/payments/advanced/component-properties#mintconfig
+                  type: string
+            executionParameters:
+              type: object
+              description: >-
+                Parameters for executing the purchase of fungible tokens like
+                memecoins.
+              properties:
+                mode:
+                  type: string
+                  enum:
+                    - exact-in
+                  description: >-
+                    The execution method for the order. 'exact-in' is used for
+                    buying fungible tokens like memecoins, specifying the exact
+                    amount to spend.
+                amount:
+                  type: string
+                  description: The amount in USD to spend on the token purchase.
+                maxSlippageBps:
+                  type: string
+                  description: >-
+                    Optional slippage tolerance in basis points (e.g., '500' for
+                    5%). If not provided, default slippage will be applied.
+              required:
+                - mode
+                - amount
+          required:
+            - tokenLocator
+        - type: array
+          title: Multiple Line Items - Collection Locators
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              collectionLocator:
+                description: >-
+                  The collection locator of the line item. For example: 
+                  `crossmint:<collectionId>`. These fields can be retrieved from
+                  the Crossmint console.
+                type: string
+                example: crossmint:<collectionId>
+              callData:
+                type: object
+                additionalProperties: {}
+                description: Information that you pass to your contract mint function.
+                properties:
+                  totalPrice:
+                    description: >-
+                      The total price of the line item. It must be the same as
+                      the contract expects to receive. Read
+                      /docs.crossmint.com/payments/advanced/component-properties#mintconfig
+                    type: string
+            required:
+              - collectionLocator
+        - type: array
+          title: Multiple Line Items - Token Locators
+          items:
+            type: object
+            additionalProperties: false
+            properties:
+              tokenLocator:
+                description: >-
+                  The token locator of the line item. For EVM chains use format
+                  `<blockchain>:<contractAddress>:<tokenId>` (e.g.
+                  `ethereum:0x71c7656ec7ab88b098defb751b7401b5f6d897:1234`). For
+                  Solana use format `solana:<mintHash>` (e.g.
+                  `solana:7nE9XwXs3XgpH8rnXMFvQYWZTXUFJyZC4rZ5CPX4X4p5`).
+                type: string
+                pattern: >-
+                  ^(ethereum|polygon|optimism|arbitrum|base|zora|avalanche|bsc):[0-9a-fA-F]{40}:\d+$|^solana:[1-9A-HJ-NP-Za-km-z]{32,44}$
+              callData:
+                type: object
+                additionalProperties: {}
+                description: Information that you pass to your contract mint function.
+                properties:
+                  totalPrice:
+                    description: >-
+                      The total price of the line item. It must be the same as
+                      the contract expects to receive. Read
+                      /docs.crossmint.com/payments/advanced/component-properties#mintconfig
+                    type: string
+                    example: "0.0001"
+                  quantityRange:
+                    type: object
+                    description: >-
+                      The estimated quantity range for memecoin purchases based
+                      on market conditions and slippage.
+                    properties:
+                      lowerBound:
+                        type: string
+                        description: >-
+                          The minimum quantity of tokens expected to be received
+                          based on current price and slippage.
+                        example: "0.0265905"
+                      upperBound:
+                        type: string
+                        description: >-
+                          The maximum quantity of tokens expected to be received
+                          based on current price and slippage.
+                        example: "0.0293895"
+              executionParameters:
+                type: object
+                description: >-
+                  Parameters for executing the purchase of fungible tokens like
+                  memecoins.
+                properties:
+                  mode:
+                    type: string
+                    enum:
+                      - exact-in
+                    description: >-
+                      The execution method for the order. 'exact-in' is used for
+                      buying fungible tokens like memecoins, specifying the
+                      exact amount to spend.
+                  amount:
+                    type: string
+                    description: The amount in USD to spend on the token purchase.
+                  maxSlippageBps:
+                    type: string
+                    description: >-
+                      Optional slippage tolerance in basis points (e.g., '500'
+                      for 5%). If not provided, default slippage will be
+                      applied.
+                required:
+                  - mode
+                  - amount
+            required:
+              - tokenLocator
+    OrderObject:
+      type: object
+      properties:
+        orderId:
+          type: string
+          example: b2959ca5-65e4-466a-bd26-1bd05cb4f837
+        phase:
+          type: string
+          example: payment
+        locale:
+          type: string
+          example: en-US
+        lineItems:
+          type: array
+          items:
+            type: object
+            properties:
+              chain:
+                type: string
+                example: polygon-amoy
+              quantity:
+                type: number
+                example: 1
+              callData:
+                type: object
+                properties:
+                  quantity:
+                    type: number
+                    example: 1
+                  ADDITIONAL_PROPERTIES:
+                    type: string
+                    example: Your other mint function arguments
+              metadata:
+                type: object
+                properties:
+                  name:
+                    type: string
+                    example: Headless Checkout Demo
+                  description:
+                    type: string
+                    example: NFT Description
+                  imageUrl:
+                    type: string
+                    example: https://cdn.io/image.png
+              quote:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: valid
+                  charges:
+                    type: object
+                    properties:
+                      unit:
+                        type: object
+                        properties:
+                          amount:
+                            type: string
+                            example: "0.0001"
+                          currency:
+                            type: string
+                            example: eth
+                      salesTax:
+                        type: object
+                        description: Sales tax applied to physical product purchases
+                        properties:
+                          amount:
+                            type: string
+                            example: "0.34"
+                          currency:
+                            type: string
+                            example: usdc
+                      shipping:
+                        type: object
+                        description: Shipping costs for physical product purchases
+                        properties:
+                          amount:
+                            type: string
+                            example: "0"
+                          currency:
+                            type: string
+                            example: usdc
+                  totalPrice:
+                    type: object
+                    properties:
+                      amount:
+                        type: string
+                        example: "0.0001"
+                      currency:
+                        type: string
+                        example: eth
+              delivery:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum:
+                      - awaiting-payment
+                      - in-progress
+                      - completed
+                      - failed
+                    description: >-
+                      Status of the delivery. 'awaiting-payment': Initial state
+                      before payment is made. 'in-progress': Payment received,
+                      transaction submitted but not yet completed. 'completed':
+                      Successfully delivered with transaction ID and tokens.
+                      'failed': Delivery failed, typically for refunded
+                      transactions.
+                    example: awaiting-payment
+                  recipient:
+                    type: object
+                    properties:
+                      locator:
+                        type: string
+                        example: email:<email_address>:<chain>
+                      email:
+                        type: string
+                        example: testy@crossmint.com
+                      walletAddress:
+                        type: string
+                        example: 0x1234abcd...
+        quote:
+          type: object
+          properties:
+            status:
+              type: string
+              enum:
+                - valid
+                - expired
+                - all-line-items-unavailable
+                - requires-physical-address
+              description: >-
+                Status of the quote. 'requires-physical-address' indicates that
+                a shipping address is required for physical products.
+              example: valid
+            quotedAt:
+              type: string
+              example: "2024-06-07T16:55:44.653Z"
+            expiresAt:
+              type: string
+              example: "2024-06-07T17:55:44.653Z"
+            totalPrice:
+              type: object
+              properties:
+                amount:
+                  type: string
+                  example: "0.0001375741"
+                currency:
+                  type: string
+                  example: eth
+        payment:
+          type: object
+          properties:
+            status:
+              type: string
+              enum:
+                - requires-kyc
+                - failed-kyc
+                - manual-kyc
+                - awaiting-payment
+                - requires-recipient
+                - requires-crypto-payer-address
+                - failed
+                - in-progress
+                - completed
+              description: >-
+                Status of the payment. View the status codes for more
+                information.
+              example: awaiting-payment
+            method:
+              type: string
+              example: base-sepolia
+            currency:
+              type: string
+              example: eth
+            preparation:
+              type: object
+              properties:
+                chain:
+                  type: string
+                  example: base-sepolia
+                payerAddress:
+                  type: string
+                  example: 0x1234abcd...
+                serializedTransaction:
+                  type: string
+                  example: 0x02f90.....
+```

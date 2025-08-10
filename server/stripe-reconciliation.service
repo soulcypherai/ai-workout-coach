@@ -1,0 +1,16 @@
+[Unit]
+Description=Stripe Reconciliation Service
+After=network.target
+
+[Service]
+Type=simple
+User=ec2-user
+WorkingDirectory=/opt/pitchroom/server
+ExecStart=/usr/bin/node scripts/stripe-reconciliation.js
+Restart=on-failure
+RestartSec=60
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target 

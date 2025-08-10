@@ -1,0 +1,17 @@
+packages:
+  - .
+  - server
+
+onlyBuiltDependencies:
+  - "@sentry-internal/node-cpu-profiler"
+  - "@sentry/cli"
+  - "@tailwindcss/oxide"
+  - bigint-buffer
+  - bufferutil
+  - core-js
+  - esbuild
+  - ffmpeg-static
+  - keccak
+  - sharp
+  - supabase
+  - utf-8-validate

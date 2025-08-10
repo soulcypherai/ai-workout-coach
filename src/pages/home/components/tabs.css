@@ -1,0 +1,79 @@
+/* Custom styles for HomeTabs component */
+
+.font-secondary {
+  font-family: var(--font-secondary);
+}
+
+.bg-accent {
+  background-color: var(--color-accent);
+}
+
+.text-accent {
+  color: var(--color-accent);
+}
+
+.text-primary {
+  color: var(--color-primary);
+}
+
+.bg-primary {
+  background-color: var(--color-bg-primary);
+}
+
+/* Pixel style font adjustment */
+.pixel-font {
+  font-family: var(--font-secondary);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 14px; /* Base size for mobile */
+  display: inline-block;
+  padding: 0 4px; /* Add some horizontal padding on small screens */
+}
+
+/* Responsive font sizes */
+@media (min-width: 480px) {
+  .pixel-font {
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 640px) {
+  .pixel-font {
+    font-size: 16px;
+    padding: 0 8px;
+  }
+}
+
+/* Custom tab styling */
+[data-slot="tabs-list"] {
+  background-color: transparent;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+[data-slot="tabs-trigger"] {
+  color: red;
+  border: none;
+  font-weight: normal;
+  padding: 0;
+  margin: 0;
+  transition: color 0.2s ease;
+  cursor: pointer;
+}
+
+[data-slot="tabs-trigger"]:hover {
+  background-color: transparent;
+  
+  
+}
+
+[data-slot="tabs-trigger"][data-state="active"] {
+  color: var(--color-accent);
+  background-color: transparent;
+  box-shadow: none;
+}
+
+[data-slot="tabs-trigger"][data-state="inactive"] {
+  color: var(--color-muted-foreground);
+  
+}

@@ -1,0 +1,7 @@
+onlyBuiltDependencies:
+  - '@sentry-internal/node-cpu-profiler'
+  - bigint-buffer
+  - bufferutil
+  - ffmpeg-static
+  - sharp
+  - utf-8-validate

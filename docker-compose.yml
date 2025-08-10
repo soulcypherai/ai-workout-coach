@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  livekit:
+    image: livekit/livekit-server:latest
+    container_name: livekit-server
+    ports:
+      - "7880:7880"     # WebSocket port
+      - "7881:7881"     # HTTP port for API
+      - "50000-50100:50000-50100/udp"  # UDP ports for WebRTC
+    command: >
+      --config /etc/livekit.yaml
+      --bind 0.0.0.0
+    volumes:
+      - ./livekit-minimal.yaml:/etc/livekit.yaml:ro
+    restart: unless-stopped
+    networks:
+      - livekit-network
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:alpine
+    container_name: livekit-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    networks:
+      - livekit-network
+
+networks:
+  livekit-network:
+    driver: bridge
