@@ -426,67 +426,8 @@ async function handleStreamingResponse(
       ]);
       console.log("Call session ID exists:", !!callSessionId);
 
-      // Handle style generation function
-      if (
-        functionCall.name === "generate_style_suggestion" &&
-        callSessionId &&
-        persona?.category === "stylist"
-      ) {
-        // Get the last captured image from the socket
-        let lastImageUrl = getLastCapturedImage(socket);
-
-        // If no image in current socket session, try to get from conversation history
-        if (!lastImageUrl && userId && avatarId) {
-          lastImageUrl = await getLastImageFromHistory(userId, avatarId);
-        }
-
-        if (lastImageUrl) {
-          // Generate a unique message ID for tracking
-          const generatingMessageId = `style-gen-${Date.now()}`;
-
-          // Use the LLM's actual response if it provided one, otherwise use a fallback
-          if (!fullResponse || fullResponse.trim() === "") {
-            fullResponse = "Let me create that look for you...";
-          }
-
-          // Emit the LLM's contextual response
-          socket.emit("llm_response_complete", {
-            fullResponse,
-            avatarId,
-            complete: true,
-            styleGeneration: {
-              type: "feedback",
-              generatingMessageId,
-              prompt: args.suggestion_prompt,
-            },
-          });
-
-          // Trigger style generation (this will emit the image when ready)
-          triggerStyleGeneration(
-            lastImageUrl,
-            args.suggestion_prompt,
-            avatarId,
-            callSessionId,
-            socket,
-            generatingMessageId,
-            args.use_reference_outfit || false,
-            args.reference_outfit_index,
-          ).catch((error) => {
-            logger.error("Style generation failed in background", {
-              error: error.message,
-              avatarId,
-              component: "llmResponder",
-            });
-          });
-        } else {
-          // No image available, respond with text
-          fullResponse =
-            "I'd love to give you a style suggestion, but I need to see your current outfit first. Could you make sure your camera is on?";
-        }
-      }
-
       // Handle Amazon purchase functions
-      else if (functionCall.name === "get_trending_products" && callSessionId) {
+      if (functionCall.name === "get_trending_products" && callSessionId) {
         try {
           logger.info("Getting trending products", {
             callSessionId,
