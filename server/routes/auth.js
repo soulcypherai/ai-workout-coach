@@ -441,30 +441,6 @@ router.get(
         });
       }
 
-      // Fetch completed music generations for this user-avatar pair
-      const musicResult = await pool.query(
-        `
-      SELECT 
-        mg.id,
-        mg.generation_type,
-        mg.input_lyrics,
-        mg.input_genres,
-        mg.output_audio_url,
-        mg.created_at,
-        mg.completed_at
-      FROM music_generations mg
-      WHERE mg.user_id = $1 
-        AND mg.avatar_id = $2 
-        AND mg.status = 'completed'
-        AND mg.output_audio_url IS NOT NULL
-        AND mg.created_at >= NOW() - INTERVAL '1 day' * $3
-      ORDER BY mg.created_at DESC
-      LIMIT 20  -- Limit to last 20 music generations
-    `,
-        [userId, avatarId, days],
-      );
-
-      console.log("[API] Found music generations:", musicResult.rows.length);
 
       // Process text messages from sessions
       const allMessages = [];
@@ -504,10 +480,10 @@ router.get(
                   };
                 }
               } else if (message.imageUrl && message.type === "image") {
-                // Handle style generation messages that have imageUrl field
+                // Handle image messages that have imageUrl field
                 imageData = {
                   url: message.imageUrl,
-                  description: "AI-generated style suggestion",
+                  description: "Image message",
                 };
                 // Remove markdown from text content
                 textContent = textContent
@@ -557,46 +533,6 @@ router.get(
         }
       }
 
-      // Process music generations
-      for (const generation of musicResult.rows) {
-        // Add user request message (lyrics generation)
-        if (
-          generation.generation_type === "lyrics" &&
-          generation.input_lyrics
-        ) {
-          const lyricsHash = `user-${generation.input_lyrics.trim()}`;
-          if (!messageHash.has(lyricsHash)) {
-            allMessages.push({
-              id: `music-request-${generation.id}`,
-              text: generation.input_lyrics,
-              sender: "user",
-              timestamp: new Date(generation.created_at).getTime(),
-              type: "text",
-            });
-            messageHash.add(lyricsHash);
-          }
-        }
-
-        // Add music result message if available
-        if (generation.output_audio_url) {
-          const musicResultMessage = {
-            id: `music-result-${generation.id}`,
-            text: `Created a ${generation.generation_type} track`,
-            sender: "avatar",
-            timestamp: new Date(
-              generation.completed_at || generation.created_at,
-            ).getTime(),
-            type: "music_result",
-            musicData: {
-              audioUrl: generation.output_audio_url,
-              title: `Generated ${generation.generation_type}`,
-              lyrics: generation.input_lyrics,
-              genres: generation.input_genres || [],
-            },
-          };
-          allMessages.push(musicResultMessage);
-        }
-      }
 
       // Sort messages by timestamp
       allMessages.sort((a, b) => a.timestamp - b.timestamp);
@@ -608,14 +544,12 @@ router.get(
         messageCount: recentMessages.length,
         imageMessageCount: imageMessageCount,
         totalSessions: sessionResult.rows.length,
-        totalMusicGenerations: musicResult.rows.length,
       });
 
       res.json({
         success: true,
         messages: recentMessages,
         totalSessions: sessionResult.rows.length,
-        totalMusicGenerations: musicResult.rows.length,
       });
     } catch (error) {
       console.error("[API] Error fetching conversation history:", error);
