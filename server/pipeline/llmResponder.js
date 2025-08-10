@@ -11,7 +11,6 @@ import {
   getTrendingProducts,
 } from "../tools/amazon-purchase.js";
 import { flags } from "../utils/feature-flags.js";
-import falService from "./falService.js";
 import {
   EnhancedLLMContext,
   PurchaseErrorGuidance,
@@ -421,7 +420,6 @@ async function handleStreamingResponse(
       console.log("Function name:", functionCall.name);
       console.log("Function args:", JSON.stringify(args, null, 2));
       console.log("Available function handlers:", [
-        "generate_style_suggestion",
         "get_trending_products", // Only this Amazon function now available
       ]);
       console.log("Call session ID exists:", !!callSessionId);
