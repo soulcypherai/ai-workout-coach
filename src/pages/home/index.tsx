@@ -77,45 +77,8 @@ const Home = () => {
   };
 
   // Build agents data dynamically from API personas, filtered by category
-  const vcs = personas
-    .filter((p) => p.category === "vc" || !p.category)
-    .map((persona, index) => ({
-      id: index + 1,
-      avatarId: persona.id,
-      name: persona.name,
-      description: persona.description || "",
-      perMinuteCost: persona.pricing_per_min || 1,
-      isUnlocked: persona.is_published,
-      x: persona.x_url,
-      image: getImageForPersona(persona.image_url),
-    }));
 
 
-  const creators = personas
-    .filter((p) => p.category === "creator")
-    .map((persona, index) => ({
-      id: index + 1,
-      avatarId: persona.id,
-      name: persona.name,
-      description: persona.description || "",
-      perMinuteCost: persona.pricing_per_min || 1,
-      isUnlocked: persona.is_published,
-      x: persona.x_url,
-      image: getImageForPersona(persona.image_url),
-    }));
-
-  const stylists = personas
-    .filter((p) => p.category === "stylist")
-    .map((persona, index) => ({
-      id: index + 1,
-      avatarId: persona.id,
-      name: persona.name,
-      description: persona.description || "",
-      perMinuteCost: persona.pricing_per_min || 1,
-      isUnlocked: persona.is_published,
-      x: persona.x_url,
-      image: getImageForPersona(persona.image_url),
-    }));
 
   const coaches = personas
     .filter((p) => p.category === "fitness")
@@ -131,9 +94,6 @@ const Home = () => {
     }));
 
   const agentsData = {
-    vcs,
-    creators,
-    stylists,
     coaches,
   };
 

@@ -396,10 +396,6 @@ export const PersonaFormModal: React.FC<PersonaFormModalProps> = ({
                   className="w-full p-2 border border-gray-600 rounded-md bg-gray-800 text-white"
                 >
                   <option value="">Select Category</option>
-                  <option value="vc">Venture Capital</option>
-                  <option value="producer">Music Producer</option>
-                  <option value="creator">Creator</option>
-                  <option value="stylist">AI Stylist</option>
                   <option value="fitness">Fitness Coach</option>
                 </select>
               </div>
