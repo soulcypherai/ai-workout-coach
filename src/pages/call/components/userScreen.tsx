@@ -634,7 +634,7 @@ const UserScreen = forwardRef<HTMLVideoElement, UserScreenProps>((props, ref) =>
     };
   }, [isCoachAvatar, registerCanvas, unregisterCanvas]);
   
-  // Dual-mode capture system: Style images for stylists, Pose data for coaches
+  // Capture system: Pose data for coaches
   useEffect(() => {
     // Skip entire effect if vision is disabled at admin level
     if (!currentPersona?.vision_enabled) return;
@@ -804,39 +804,6 @@ const UserScreen = forwardRef<HTMLVideoElement, UserScreenProps>((props, ref) =>
         } catch (error) {
           console.error("[Coach Mode] Failed to process pose:", error);
         }
-      } else if (isStylistAvatar) {
-        // STYLIST MODE: Send full images for style analysis
-        if (now - lastCaptureTime < VISION_INTERVAL) return;
-        lastCaptureTime = now;
-        
-        try {
-          const video = videoRef.current;
-          if (video.videoWidth === 0 || video.videoHeight === 0) {
-            console.warn("[Stylist Mode] Video not ready yet, skipping frame");
-            return;
-          }
-          
-          const canvas = document.createElement('canvas');
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-          const ctx = canvas.getContext('2d');
-          
-          if (ctx) {
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const imageData = canvas.toDataURL('image/jpeg', 0.8);
-            
-            // Check similarity to avoid duplicate images
-            const isSimilar = await areImagesSimilar(lastCapturedImageRef.current, imageData, 0.15);
-            
-            if (!isSimilar) {
-              console.log("[Stylist Mode] Image changed, sending frame...");
-              await service.sendImage(imageData);
-              lastCapturedImageRef.current = imageData;
-            }
-          }
-        } catch (error) {
-          console.error("[Stylist Mode] Failed to capture/send frame:", error);
-        }
       }
     };
 
@@ -848,7 +815,7 @@ const UserScreen = forwardRef<HTMLVideoElement, UserScreenProps>((props, ref) =>
       if (frameInterval) clearInterval(frameInterval);
     };
   }, [isCameraOn, videoRef, currentPersona, service, visionEnabled, isConnected, sessionId, 
-      isCoachAvatar, isStylistAvatar, isPoseDetectorReady, currentExercise, repCount, detectPoses, isVideoReady]);
+      isCoachAvatar, isPoseDetectorReady, currentExercise, repCount, detectPoses, isVideoReady]);
 
   // Manual capture function for self-references
   const manualCaptureFrame = useCallback(async () => {
