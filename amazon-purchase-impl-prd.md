@@ -324,14 +324,6 @@ export const SAMPLE_PRODUCTS = [
   { asin:"amazon:B01LR5S6HK", name:"Amazon Neoprene Dumbbell Hand Weights", price:21.99, url:"https://www.amazon.com/dp/B01LR5S6HK", imageUrl:"https://m.media-amazon.com/images/I/61x.jpg" }
 ];
 export const SHIPPING = {
-  name:"Yichen Li",
-  address1:"2810 Jackson Avenue",
-  address2:"APT 28K",
-  city:"Long Island City",
-  state:"NY",
-  postalCode:"11101",
-  country:"US",
-  email:"ellieli0630@gmail.com"
 };
 ```
 
@@ -425,12 +417,6 @@ return { orderId: order.id, status: "completed", txHash };
 ## 22) Hardcoded Configuration Values
 
 **Shipping Information:**
-
-- Name: **Yichen Li**  
-- Address: **2810 Jackson Avenue, APT 28K**  
-- City: **Long Island City, NY 11101**  
-- Email: **ellieli0630@gmail.com**  
-- Country: **US**
 
 **Blockchain Configuration:**
 
