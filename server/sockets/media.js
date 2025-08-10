@@ -2507,13 +2507,8 @@ export function setupMediaNamespace(io) {
 
               // Customize prompt based on avatar category
               let proactivePrompt = "I can see you through the camera. ";
-              if (persona.category === "stylist") {
-                proactivePrompt =
-                  "I can see what you're wearing. Based on what I observe, here's a quick style tip:";
-              } else {
-                proactivePrompt =
-                  "I notice something interesting about what I'm seeing:";
-              }
+              proactivePrompt =
+                "I notice something interesting about what I'm seeing:";
 
               // Create multimodal message
               const visionMessage = [

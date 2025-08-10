@@ -259,28 +259,6 @@ const ChatInterface = () => {
               );
             }
 
-            // Special rendering for style generation status
-            if (
-              message.type === "style_generation" &&
-              message.imageData?.status === "generating"
-            ) {
-              return (
-                <div key={message.id} className="flex justify-start">
-                  <div className="max-w-[80%] rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-white">
-                    <p className="text-sm whitespace-pre-wrap">
-                      {message.text}
-                    </p>
-                    <div className="mt-2 flex items-center gap-2 text-xs text-white/70">
-                      <div className="h-3 w-3 animate-spin rounded-full border-2 border-white/30 border-t-white"></div>
-                      <span>Generating style suggestion...</span>
-                    </div>
-                    <span className="mt-1 block text-xs text-white/50">
-                      {formatTime(message.timestamp)}
-                    </span>
-                  </div>
-                </div>
-              );
-            }
 
             // Special rendering for image messages
             if (message.type === "image" && message.imageData) {

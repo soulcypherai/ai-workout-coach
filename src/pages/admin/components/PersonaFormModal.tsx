@@ -396,6 +396,8 @@ export const PersonaFormModal: React.FC<PersonaFormModalProps> = ({
                   className="w-full p-2 border border-gray-600 rounded-md bg-gray-800 text-white"
                 >
                   <option value="">Select Category</option>
+                  <option value="vc">Venture Capital</option>
+                  <option value="creator">Creator</option>
                   <option value="fitness">Fitness Coach</option>
                 </select>
               </div>
@@ -414,15 +416,6 @@ export const PersonaFormModal: React.FC<PersonaFormModalProps> = ({
             </div>
 
             {/* Reference Outfits - Only for Stylists */}
-            {formData.category === 'stylist' && (
-              <div>
-                <ReferenceOutfitsManager
-                  value={formData.referenceOutfits || []}
-                  onChange={(outfits) => setFormData({...formData, referenceOutfits: outfits})}
-                  personaId={formData.id || 'new-persona'}
-                />
-              </div>
-            )}
 
             {/* Music Production Fields - Only for Producers */}
             {formData.category === 'producer' && (

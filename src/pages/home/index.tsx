@@ -77,8 +77,31 @@ const Home = () => {
   };
 
   // Build agents data dynamically from API personas, filtered by category
+  const vcs = personas
+    .filter((p) => p.category === "vc" || !p.category)
+    .map((persona, index) => ({
+      id: index + 1,
+      avatarId: persona.id,
+      name: persona.name,
+      description: persona.description || "",
+      perMinuteCost: persona.pricing_per_min || 1,
+      isUnlocked: persona.is_published,
+      x: persona.x_url,
+      image: getImageForPersona(persona.image_url),
+    }));
 
-
+  const creators = personas
+    .filter((p) => p.category === "creator")
+    .map((persona, index) => ({
+      id: index + 1,
+      avatarId: persona.id,
+      name: persona.name,
+      description: persona.description || "",
+      perMinuteCost: persona.pricing_per_min || 1,
+      isUnlocked: persona.is_published,
+      x: persona.x_url,
+      image: getImageForPersona(persona.image_url),
+    }));
 
   const coaches = personas
     .filter((p) => p.category === "fitness")
@@ -94,6 +117,8 @@ const Home = () => {
     }));
 
   const agentsData = {
+    vcs,
+    creators,
     coaches,
   };
 
@@ -171,15 +196,12 @@ const Home = () => {
                 key={agent.id}
                 name={agent.name}
                 description={agent.description}
-                perMinuteCost={agent.perMinuteCost}
+                price={agent.perMinuteCost}
+                avatarId={agent.avatarId}
                 isUnlocked={agent.isUnlocked}
-                xUrl={agent.x}
-                onClick={() => {
-                  if (agent.isUnlocked) {
-                    handleAgentClick(agent.avatarId);
-                  }
-                }}
+                x={agent.x}
                 image={agent.image}
+                onClick={() => handleAgentClick(agent.avatarId)}
               />
             ))}
           </div>

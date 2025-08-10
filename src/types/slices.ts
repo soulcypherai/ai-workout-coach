@@ -70,8 +70,7 @@ export type ChatMessage = {
   timestamp: number;
   type?:
   | "text"
-  | "image"
-  | "style_generation";
+  | "image";
   imageData?: {
     url: string;
     description?: string;

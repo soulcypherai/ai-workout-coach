@@ -21,11 +21,9 @@ import { RestTimer } from "@/components/RestTimer";
 import { WorkoutFlowManager, WorkoutTransition } from "@/lib/workoutFlowManager";
 import type { NormalizedLandmark } from '@mediapipe/tasks-vision';
 
-interface UserScreenProps {
-  showStyleNotification?: boolean;
-}
+interface UserScreenProps {}
 
-const UserScreen = forwardRef<HTMLVideoElement, UserScreenProps>(({ showStyleNotification = false }, ref) => {
+const UserScreen = forwardRef<HTMLVideoElement, UserScreenProps>((props, ref) => {
   const { slug } = useParams();
   const dispatch = useDispatch();
   
@@ -66,10 +64,6 @@ const UserScreen = forwardRef<HTMLVideoElement, UserScreenProps>(({ showStyleNot
   const currentPersona = personas.find((p) => p.slug === slug);
   const isCoachAvatar = currentPersona?.category === 'fitness';
   
-  // Debug logging
-  useEffect(() => {
-    console.log('[UserScreen] showStyleNotification prop changed:', showStyleNotification);
-  }, [showStyleNotification]);
   
   const isCameraOn = useSelector((state) => state.session.isCameraOn);
   const isChatOpen = useSelector((state) => state.session.isChatOpen);
@@ -81,7 +75,6 @@ const UserScreen = forwardRef<HTMLVideoElement, UserScreenProps>(({ showStyleNot
   const { visionEnabled, isConnected, sessionId } = useAvatarChatState();
   const { registerCaptureHandler } = useVisionCapture();
   
-  const isStylistAvatar = currentPersona?.category === 'stylist';
   
   const videoRef = ref as React.RefObject<HTMLVideoElement>; // cast once for type safety
   const lastLogTimeRef = useRef<number>(0);
@@ -1306,18 +1299,6 @@ const UserScreen = forwardRef<HTMLVideoElement, UserScreenProps>(({ showStyleNot
             >
               <RotateCw className="h-5 w-5 text-white" />
             </button>
-            
-            {/* Style notification overlay */}
-            {showStyleNotification && (
-              <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-50">
-                <div className="bg-white/90 backdrop-blur-sm rounded-full px-4 py-2 flex items-center gap-2 shadow-lg">
-                  <Sparkles className="h-5 w-5 text-purple-600 animate-pulse" />
-                  <span className="text-sm font-medium text-gray-800">
-                    Your new style is ready! Check chat for details
-                  </span>
-                </div>
-              </div>
-            )}
           </>
         ) : (
           <img

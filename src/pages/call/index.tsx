@@ -57,7 +57,6 @@ const CallPage = () => {
   const isRefresh = useRef(false);
   const [facingMode, setFacingMode] = useState<"user" | "environment">("user");
   const [personasLoading, setPersonasLoading] = useState(false);
-  const [showStyleNotification, setShowStyleNotification] = useState(false);
   const [showProducts, setShowProducts] = useState(false);
   const [products] = useState<any[]>([]);
   const isChatOpen = useSelector((state) => state.session.isChatOpen);
@@ -857,7 +856,6 @@ const CallPage = () => {
               >
                 <UserScreen
                   ref={userVideoRef}
-                  showStyleNotification={showStyleNotification}
                 />
               </div>
             </div>

@@ -639,42 +639,6 @@ Keep it brief, natural, and match your personality. Don't repeat what the user s
 }
 
 
-// **Style generation tool definition for AI stylists**
-function getStyleGenerationTool(persona) {
-  // Customize the tool description based on the stylist's personality
-  const styleExpertise = persona.personality?.expertise || "fashion and style";
-  const styleTone = persona.personality?.tone || "professional";
-  const hasReferenceOutfits =
-    persona.referenceOutfits &&
-    Array.isArray(persona.referenceOutfits) &&
-    persona.referenceOutfits.length > 0;
-
-  return {
-    type: "function",
-    function: {
-      name: "generate_style_suggestion",
-      description: `REQUIRED: Use this function for ANY styling request including "something sexier", "something more conservative", "show me", etc. Generate ONE visual outfit transformation based on my ${styleExpertise} expertise. MANDATORY for phrases like: "something sexier/casual/formal", "show me", "now?", "how about now?", "go ahead". ${hasReferenceOutfits ? "I can either: 1) Use AI to transform their outfit based on text description, or 2) Virtually dress them in actual garments from my curated collection for a realistic try-on." : ""} DO NOT respond with text only - ALWAYS use this function for style requests.`,
-      parameters: {
-        type: "object",
-        properties: {
-          suggestion_prompt: {
-            type: "string",
-            description: `Describe the outfit transformation. Be specific about colors, styles, and pieces.`,
-          },
-          use_reference_outfit: {
-            type: "boolean",
-            description: `${hasReferenceOutfits ? "Set to true to use actual garments from my collection (best for when user mentions specific brands or wants to try exact pieces). Set to false for AI-generated transformations based on description (best for general style advice)." : "Must be false as no reference outfits are available."}`,
-          },
-          reference_outfit_index: {
-            type: "integer",
-            description: `${hasReferenceOutfits ? `When use_reference_outfit is true, specify which outfit index to use (0-based). Available outfits: ${persona.referenceOutfits.map((o, i) => `[${i}] ${o.brand || ""} ${o.name || ""} - ${o.description || ""}`).join("; ")}` : "Not applicable - no reference outfits available."}`,
-          },
-        },
-        required: ["suggestion_prompt", "use_reference_outfit"],
-      },
-    },
-  };
-}
 
 // **Amazon Purchase Tool Definitions**
 function getAmazonPurchaseTools() {
