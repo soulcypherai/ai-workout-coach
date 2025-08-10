@@ -27,7 +27,6 @@
     "@aws-sdk/s3-request-presigner": "^3.837.0",
     "@coinbase/cdp-sdk": "^1.33.0",
     "@elevenlabs/elevenlabs-js": "^2.4.0",
-    "@fal-ai/client": "^1.5.0",
     "@goat-sdk/adapter-vercel-ai": "^0.2.10",
     "@goat-sdk/plugin-crossmint-headless-checkout": "^0.0.13",
     "@goat-sdk/wallet-viem": "^0.3.0",
