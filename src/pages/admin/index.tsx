@@ -400,39 +400,6 @@ const AdminPanel = () => {
                           </div>
                       </div>
 
-                      {/* Reference Outfits Display (for Stylists) */}
-                      {persona.category === 'stylist' && persona.referenceOutfits && persona.referenceOutfits.length > 0 && (
-                          <div className="bg-gray-800 p-3 rounded-lg">
-                            <label className="block text-sm font-medium text-gray-400 mb-2">Reference Outfits ({persona.referenceOutfits.length})</label>
-                            <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
-                              {persona.referenceOutfits.map((outfit: any, index: number) => (
-                                <div key={outfit.id || index} className="bg-gray-900 p-2 rounded">
-                                  {outfit.imageUrl && (
-                                    <img 
-                                      src={outfit.imageUrl} 
-                                      alt={outfit.name || `Outfit ${index + 1}`}
-                                      className="w-full h-20 object-cover rounded mb-1"
-                                    />
-                                  )}
-                                  <p className="text-sm text-white font-medium truncate">{outfit.name || 'Unnamed'}</p>
-                                  {outfit.brand && <p className="text-sm text-gray-400 truncate">{outfit.brand}</p>}
-                                  {outfit.tags && outfit.tags.length > 0 && (
-                                    <div className="flex flex-wrap gap-0.5 mt-0.5">
-                                      {outfit.tags.slice(0, 2).map((tag: string, i: number) => (
-                                        <span key={i} className="text-xs bg-gray-700 text-gray-300 px-1 rounded">
-                                          {tag}
-                                        </span>
-                                      ))}
-                                      {outfit.tags.length > 2 && (
-                                        <span className="text-xs text-gray-500">+{outfit.tags.length - 2}</span>
-                                      )}
-                                    </div>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                      )}
 
                       <div className="flex gap-3">
                           <details className="bg-gray-800 rounded-lg flex-1">

@@ -415,30 +415,7 @@ export const PersonaFormModal: React.FC<PersonaFormModalProps> = ({
               </div>
             </div>
 
-            {/* Reference Outfits - Only for Stylists */}
 
-            {/* Music Production Fields - Only for Producers */}
-            {formData.category === 'producer' && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium text-gray-200">Music Production Settings</h3>
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">Preferred Genres</label>
-                  <TagInput
-                    value={formData.preferredGenres || []}
-                    onChange={(tags) => setFormData({...formData, preferredGenres: tags})}
-                    placeholder="Add genres (e.g., hip-hop, electronic)"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">Audio References</label>
-                  <TagInput
-                    value={formData.audioReferences || []}
-                    onChange={(urls) => setFormData({...formData, audioReferences: urls})}
-                    placeholder="Add audio reference URLs"
-                  />
-                </div>
-              </div>
-            )}
 
             {/* Exercise Configuration - Only for Fitness/Coach */}
             {formData.category === 'fitness' && (
