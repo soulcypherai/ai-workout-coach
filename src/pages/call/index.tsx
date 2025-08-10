@@ -15,7 +15,6 @@ import {
 import {
   addChatMessage,
   clearChatMessages,
-  removeChatMessage,
   toggleCameraForCall,
   toggleSessionEnded,
 } from "@/store/slices/session";
@@ -447,197 +446,20 @@ const CallPage = () => {
     avatarChatService.on("image-processed", handleImageProcessed);
 
     // Handle music generation WebSocket events at call level (works even when chat isn't open)
-    const handleMusicGenerationComplete = (data: {
-      fullResponse: string;
-      musicGeneration?: {
-        type: string;
-        generatingMessageId?: string;
-        generationType: string;
-        requestId: string;
-        generationId?: string;
-        lyrics?: string;
-        genres?: string[];
-        audioUrl?: string;
-      };
-    }) => {
-      if (data.musicGeneration?.type === "feedback") {
-        const avatarMessage: ChatMessage = {
-          id:
-            data.musicGeneration.generatingMessageId || `avatar-${Date.now()}`,
-          text: data.fullResponse,
-          sender: "avatar",
-          timestamp: Date.now(),
-          type: "music_generation",
-          musicData: {
-            generationType: data.musicGeneration.generationType as
-              | "lyrics"
-              | "remix",
-            status: "generating",
-            requestId: data.musicGeneration.requestId,
-            lyrics: data.musicGeneration.lyrics,
-            genres: data.musicGeneration.genres,
-            generatingMessageId: data.musicGeneration.generatingMessageId,
-          },
-        };
-        dispatch(addChatMessage(avatarMessage));
-      } else if (data.musicGeneration?.type === "completion") {
-        // Remove the generating message
-        if (data.musicGeneration.generatingMessageId) {
-          dispatch(removeChatMessage(data.musicGeneration.generatingMessageId));
-        }
 
-        // Add completion message
-        const completionMessage: ChatMessage = {
-          id: `music-completion-${Date.now()}`,
-          text: data.fullResponse,
-          sender: "avatar",
-          timestamp: Date.now(),
-        };
-        dispatch(addChatMessage(completionMessage));
-
-        // Add the music result message
-        const musicMessage: ChatMessage = {
-          id: `music-result-${Date.now()}`,
-          text: "🎵 Generated Track",
-          sender: "avatar",
-          timestamp: Date.now(),
-          type: "music_result",
-          musicData: {
-            audioUrl: data.musicGeneration.audioUrl,
-            title: `Generated Track - ${data.musicGeneration.genres?.join(", ") || "Music"}`,
-            lyrics: data.musicGeneration.lyrics,
-            genres: data.musicGeneration.genres,
-            generationType: data.musicGeneration.generationType as
-              | "lyrics"
-              | "remix",
-            status: "completed",
-            requestId: data.musicGeneration.requestId,
-            generationId: data.musicGeneration.generationId,
-          },
-        };
-        dispatch(addChatMessage(musicMessage));
-
-        // For gesture music, ask user if they want to play it
-        if (
-          data.musicGeneration.generationType === "lyrics" &&
-          data.musicGeneration.audioUrl
-        ) {
-          const playPromptMessage: ChatMessage = {
-            id: `play-prompt-${Date.now()}`,
-            text: "Would you like me to play your new track?",
-            sender: "avatar",
-            timestamp: Date.now() + 100, // Slightly later timestamp
-          };
-          dispatch(addChatMessage(playPromptMessage));
-        }
-      }
-    };
-
-    // Handle style generation completion
-    const handleStyleGenerationComplete = (data: {
-      fullResponse: string;
-      styleGeneration?: {
-        type: string;
-        imageUrl?: string;
-        description?: string;
-        prompt?: string;
-        generatingMessageId?: string;
-      };
-    }) => {
-      if (data.styleGeneration?.type === "feedback") {
-        // Add feedback message while generating
-        const feedbackMessage: ChatMessage = {
-          id:
-            data.styleGeneration.generatingMessageId ||
-            `style-feedback-${Date.now()}`,
-          text: data.fullResponse,
-          sender: "avatar",
-          timestamp: Date.now(),
-          type: "style_generation",
-          imageData: {
-            url: "", // Will be filled when generation completes
-            status: "generating",
-            description: data.styleGeneration.prompt,
-          },
-        };
-        dispatch(addChatMessage(feedbackMessage));
-      } else if (data.styleGeneration?.type === "completion") {
-        // Remove the generating message if exists
-        if (data.styleGeneration.generatingMessageId) {
-          dispatch(removeChatMessage(data.styleGeneration.generatingMessageId));
-        }
-
-        // Add the style result message with image
-        const styleMessage: ChatMessage = {
-          id: `style-result-${Date.now()}`,
-          text: data.fullResponse,
-          sender: "avatar",
-          timestamp: Date.now(),
-          type: "image",
-          imageData: {
-            url: data.styleGeneration.imageUrl!,
-            description:
-              data.styleGeneration.description ||
-              "AI-generated style suggestion",
-          },
-        };
-        dispatch(addChatMessage(styleMessage));
-
-        // Show notification if user is in camera mode
-        // Get current state from Redux store to avoid stale closure
-        const currentState = store.getState();
-        const currentIsCameraOn = currentState.session.isCameraOn;
-        const currentIsChatOpen = currentState.session.isChatOpen;
-
-        console.log(
-          "[CallPage] Style generation complete - checking notification conditions",
-          {
-            isCameraOn: currentIsCameraOn,
-            isChatOpen: currentIsChatOpen,
-            shouldShowNotification: currentIsCameraOn && !currentIsChatOpen,
-            timestamp: new Date().toISOString(),
-          },
-        );
-
-        if (currentIsCameraOn && !currentIsChatOpen) {
-          console.log("[CallPage] Showing style notification");
-          setShowStyleNotification(true);
-          // Auto-hide after 2 seconds
-          setTimeout(() => {
-            console.log("[CallPage] Hiding style notification");
-            setShowStyleNotification(false);
-          }, 2000);
-        }
-
-        // Always dispatch event for chat button sparkle
-        window.dispatchEvent(new CustomEvent("style-ready"));
-        console.log(
-          "[CallPage] Dispatched style-ready event for chat button sparkle",
-        );
-      }
-    };
 
     // Handle ALL LLM responses at the CallPage level
     const handleLLMResponseComplete = (data: {
       fullResponse: string;
-      musicGeneration?: any;
-      styleGeneration?: any;
     }) => {
-      // Handle music generation messages
-      if (data.musicGeneration) {
-        handleMusicGenerationComplete(data);
-      } else if (data.styleGeneration) {
-        handleStyleGenerationComplete(data);
-      } else {
-        // Handle regular text responses
-        const avatarMessage: ChatMessage = {
-          id: `avatar-${Date.now()}`,
-          text: data.fullResponse,
-          sender: "avatar",
-          timestamp: Date.now(),
-        };
-        dispatch(addChatMessage(avatarMessage));
-      }
+      // Handle regular text responses
+      const avatarMessage: ChatMessage = {
+        id: `avatar-${Date.now()}`,
+        text: data.fullResponse,
+        sender: "avatar",
+        timestamp: Date.now(),
+      };
+      dispatch(addChatMessage(avatarMessage));
     };
 
     // Handle user messages from text input
